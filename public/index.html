@@ -5,1253 +5,875 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matureminds Clicker Dashboard</title>
 <style>
-  :root {
-    --gold: #C9A84C;
-    --gold-light: #E8C96A;
-    --gold-dim: #8A6E2F;
-    --black: #080808;
-    --card-bg: #111111;
-    --card-border: #222222;
-    --surface: #161616;
-    --text: #F0F0F0;
-    --text-dim: #888888;
-    --online: #2ECC71;
-    --offline: #E74C3C;
-    --reconnect: #F39C12;
-    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--black);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── HEADER ── */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: #0c0c0c;
-    border-bottom: 1px solid var(--gold-dim);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    height: 64px;
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .logo-diamond {
-    width: 28px;
-    height: 28px;
-    background: var(--gold);
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  }
-
-  .logo h1 {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-
-  .header-stats {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .stat-pill {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-
-  .stat-pill .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--online);
-    box-shadow: 0 0 6px var(--online);
-  }
-
-  .stat-pill .dot.offline { background: var(--offline); box-shadow: 0 0 6px var(--offline); }
-
-  .stat-number { color: var(--text); font-weight: 700; }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .last-refresh {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  /* ── NAV TABS ── */
-  nav {
-    background: #0c0c0c;
-    border-bottom: 1px solid #1a1a1a;
-    display: flex;
-    align-items: center;
-    padding: 0 28px;
-    gap: 4px;
-  }
-
-  .nav-tab {
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: var(--text-dim);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    user-select: none;
-    text-transform: uppercase;
-  }
-
-  .nav-tab:hover { color: var(--gold-light); }
-  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
-
-  /* ── PAGES ── */
-  .page { display: none; padding: 28px; }
-  .page.active { display: block; }
-
-  /* ── LIVE WALL ── */
-  .wall-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .wall-title {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    font-weight: 600;
-  }
-
-  .wall-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .btn {
-    padding: 8px 18px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-  }
-
-  .btn-gold {
-    background: var(--gold);
-    color: #000;
-  }
-  .btn-gold:hover { background: var(--gold-light); }
-
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--gold-dim);
-    color: var(--gold);
-  }
-  .btn-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
-
-  .btn-danger {
-    background: transparent;
-    border: 1px solid #5a1a1a;
-    color: #E74C3C;
-  }
-  .btn-danger:hover { border-color: #E74C3C; background: rgba(231,76,60,0.1); }
-
-  .refresh-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  .toggle-switch {
-    width: 36px;
-    height: 20px;
-    background: #222;
-    border-radius: 10px;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.2s;
-    border: 1px solid #333;
-  }
-  .toggle-switch.on { background: var(--gold-dim); }
-  .toggle-switch::after {
-    content: '';
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: #fff;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.2s;
-  }
-  .toggle-switch.on::after { transform: translateX(16px); }
-
-  /* ── DEVICE GRID ── */
-  .device-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
-  }
-
-  .device-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    position: relative;
-  }
-
-  .device-card:hover {
-    border-color: var(--gold-dim);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(201,168,76,0.1);
-  }
-
-  .device-card.offline {
-    opacity: 0.55;
-  }
-
-  .screenshot-wrap {
-    width: 100%;
-    aspect-ratio: 9/18;
-    background: #0a0a0a;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .screenshot-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .screenshot-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: #333;
-  }
-
-  .screenshot-placeholder svg { opacity: 0.3; }
-
-  .screenshot-placeholder span {
-    font-size: 10px;
-    color: #333;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .status-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 2px solid var(--card-bg);
-  }
-
-  .status-badge.online { background: var(--online); box-shadow: 0 0 6px var(--online); }
-  .status-badge.offline { background: var(--offline); }
-  .status-badge.loading { background: var(--reconnect); animation: pulse 1.2s infinite; }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .card-info {
-    padding: 10px 12px 12px;
-    border-top: 1px solid var(--card-border);
-  }
-
-  .card-device-id {
-    font-size: 10px;
-    color: var(--gold-dim);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-
-  .card-poster {
-    font-size: 12px;
-    color: var(--text);
-    font-weight: 600;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .card-poster.empty { color: var(--text-dim); font-weight: 400; font-style: italic; }
-
-  .card-accounts {
-    font-size: 10px;
-    color: var(--text-dim);
-    line-height: 1.5;
-  }
-
-  .card-accounts .account-tag {
-    color: var(--gold-dim);
-  }
-
-  /* ── DEVICE MODAL ── */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--gold-dim);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transform: scale(0.96);
-    transition: transform 0.2s;
-  }
-
-  .modal-overlay.open .modal { transform: scale(1); }
-
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    border-bottom: 1px solid #222;
-  }
-
-  .modal-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .modal-device-id {
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--gold);
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .modal-poster-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-
-  .modal-close {
-    width: 32px;
-    height: 32px;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    color: var(--text-dim);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: all 0.15s;
-  }
-
-  .modal-close:hover { background: #2a2a2a; color: var(--text); }
-
-  .modal-body {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0;
-    overflow: hidden;
-    flex: 1;
-  }
-
-  .modal-screen {
-    width: 260px;
-    background: #0a0a0a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 14px;
-    border-right: 1px solid #1a1a1a;
-    overflow-y: auto;
-  }
-
-  .modal-screenshot-wrap {
-    width: 200px;
-    border-radius: 18px;
-    overflow: hidden;
-    border: 3px solid #222;
-    background: #000;
-    aspect-ratio: 9/18;
-  }
-
-  .modal-screenshot-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .modal-screen-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .modal-panel {
-    padding: 24px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .panel-section h3 {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    font-weight: 700;
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #1a1a1a;
-  }
-
-  .info-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid #1a1a1a;
-  }
-
-  .info-row:last-child { border-bottom: none; }
-
-  .info-label {
-    font-size: 11px;
-    color: var(--text-dim);
-    min-width: 110px;
-    padding-top: 2px;
-  }
-
-  .info-value {
-    font-size: 13px;
-    color: var(--text);
-    font-weight: 500;
-    flex: 1;
-  }
-
-  .status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .status-indicator.online { color: var(--online); }
-  .status-indicator.offline { color: var(--offline); }
-
-  .status-indicator .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
-
-  .status-indicator.online .dot { background: var(--online); box-shadow: 0 0 6px var(--online); }
-  .status-indicator.offline .dot { background: var(--offline); }
-
-  /* Edit fields */
-  .edit-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .edit-field label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.5px;
-  }
-
-  .edit-field input, .edit-field textarea {
-    background: #0e0e0e;
-    border: 1px solid #2a2a2a;
-    border-radius: 5px;
-    color: var(--text);
-    font-size: 13px;
-    padding: 8px 10px;
-    font-family: var(--font);
-    transition: border-color 0.15s;
-    width: 100%;
-  }
-
-  .edit-field textarea { resize: vertical; min-height: 70px; }
-
-  .edit-field input:focus, .edit-field textarea:focus {
-    outline: none;
-    border-color: var(--gold-dim);
-  }
-
-  .save-label-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 4px;
-  }
-
-  /* ── SETTINGS PAGE ── */
-  .settings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    max-width: 900px;
-  }
-
-  @media (max-width: 700px) { .settings-grid { grid-template-columns: 1fr; } }
-
-  .settings-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 24px;
-  }
-
-  .settings-card h2 {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #222;
-  }
-
-  .settings-field {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    margin-bottom: 16px;
-  }
-
-  .settings-field label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.5px;
-  }
-
-  .settings-field input, .settings-field select {
-    background: #0e0e0e;
-    border: 1px solid #2a2a2a;
-    border-radius: 5px;
-    color: var(--text);
-    font-size: 13px;
-    padding: 9px 12px;
-    font-family: var(--font);
-    width: 100%;
-    transition: border-color 0.15s;
-  }
-
-  .settings-field input:focus, .settings-field select:focus {
-    outline: none;
-    border-color: var(--gold-dim);
-  }
-
-  .settings-field select option { background: #111; }
-
-  .device-labels-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .device-label-row {
-    background: #0e0e0e;
-    border: 1px solid #1e1e1e;
-    border-radius: 6px;
-    padding: 12px;
-    display: grid;
-    grid-template-columns: 90px 1fr 1fr;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .device-label-id {
-    font-size: 11px;
-    color: var(--gold-dim);
-    font-weight: 700;
-    letter-spacing: 1px;
-    font-family: monospace;
-  }
-
-  .device-label-row input {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 4px;
-    color: var(--text);
-    font-size: 12px;
-    padding: 6px 8px;
-    font-family: var(--font);
-    width: 100%;
-  }
-
-  .device-label-row input:focus { outline: none; border-color: var(--gold-dim); }
-
-  .toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    background: var(--surface);
-    border: 1px solid var(--gold-dim);
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-size: 13px;
-    color: var(--text);
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.25s;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.error { border-color: #5a1a1a; color: var(--offline); }
-  .toast.success { border-color: var(--gold-dim); color: var(--gold-light); }
-
-  /* No API key warning */
-  .api-warning {
-    background: #1a0e00;
-    border: 1px solid #5a3a00;
-    border-radius: 8px;
-    padding: 16px 20px;
-    color: var(--reconnect);
-    font-size: 13px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .api-warning a {
-    color: var(--gold);
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --gold-dim: #7A6230;
+  --gold-bg: rgba(201,168,76,0.06);
+  --black: #080808;
+  --card: #111111;
+  --card-border: #1E1E1E;
+  --surface: #141414;
+  --surface2: #1A1A1A;
+  --text: #F0F0F0;
+  --text-dim: #666666;
+  --text-mid: #999999;
+  --online: #22C55E;
+  --offline: #EF4444;
+  --warn: #F59E0B;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radius: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--black);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:#0A0A0A;
+  border-bottom:1px solid #1A1A1A;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:60px;
+}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:24px;height:24px;background:var(--gold);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+.logo h1{font-size:13px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+.header-center{display:flex;align-items:center;gap:20px;}
+.hstat{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);}
+.hstat b{color:var(--text);font-size:14px;}
+.hdot{width:7px;height:7px;border-radius:50%;}
+.hdot.on{background:var(--online);box-shadow:0 0 5px var(--online);}
+.hdot.off{background:var(--offline);}
+.header-right{display:flex;align-items:center;gap:10px;}
+.htime{font-size:11px;color:var(--text-dim);}
+.hbtn{padding:6px 14px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid var(--gold-dim);background:transparent;color:var(--gold);transition:all .15s;}
+.hbtn:hover{background:var(--gold-bg);border-color:var(--gold);}
+
+/* ── NAV ── */
+nav{background:#0A0A0A;border-bottom:1px solid #151515;display:flex;align-items:center;padding:0 32px;gap:2px;}
+.ntab{padding:11px 18px;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-transform:uppercase;user-select:none;}
+.ntab:hover{color:var(--gold-light);}
+.ntab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* ── PAGES ── */
+.page{display:none;padding:28px 32px;}
+.page.active{display:block;}
+
+/* ── HUB PAGE ── */
+.hub-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.page-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);font-weight:700;}
+.hub-actions{display:flex;gap:10px;}
+
+/* Model grid */
+.model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+
+.model-card{
+  background:var(--card);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:20px;
+  cursor:pointer;
+  transition:border-color .2s,transform .15s,box-shadow .2s;
+  position:relative;
+  overflow:hidden;
+}
+.model-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--model-color,var(--gold));
+}
+.model-card:hover{border-color:var(--model-color,var(--gold-dim));transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4);}
+
+.mc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.mc-name{font-size:20px;font-weight:800;letter-spacing:-.3px;color:var(--text);}
+.mc-status-pill{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface2);border-radius:20px;
+  padding:4px 10px;font-size:11px;font-weight:700;
+}
+.mc-status-pill.all-on{color:var(--online);}
+.mc-status-pill.some-off{color:var(--warn);}
+.mc-status-pill.all-off{color:var(--offline);}
+.mc-status-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+.mc-stats{display:flex;gap:16px;margin-bottom:14px;}
+.mc-stat{text-align:center;}
+.mc-stat-n{font-size:18px;font-weight:800;color:var(--text);}
+.mc-stat-l{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+
+.mc-divider{height:1px;background:var(--card-border);margin-bottom:14px;}
+
+.mc-posters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.poster-chip{
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  background:var(--surface2);color:var(--text-mid);
+  border:1px solid #252525;
+}
+
+.mc-accounts{font-size:11px;color:var(--text-dim);line-height:1.7;}
+.mc-account-tag{color:var(--gold-dim);}
+
+.mc-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--card-border);
+}
+.mc-view-btn{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--model-color,var(--gold));
+  display:flex;align-items:center;gap:5px;
+}
+.mc-view-btn::after{content:'→';}
+.mc-clicker-dots{display:flex;gap:4px;}
+.mc-clicker-dot{width:8px;height:8px;border-radius:50%;background:var(--online);}
+.mc-clicker-dot.off{background:var(--offline);}
+.mc-clicker-dot.unk{background:#333;}
+
+/* ── MODEL VIEW PAGE ── */
+.model-view-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;}
+.back-btn{
+  width:36px;height:36px;background:var(--surface2);border:1px solid var(--card-border);
+  border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);font-size:16px;transition:all .15s;flex-shrink:0;
+}
+.back-btn:hover{background:var(--surface);color:var(--text);}
+.mv-title{font-size:24px;font-weight:800;color:var(--text);}
+.mv-subtitle{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.mv-bar{
+  height:4px;border-radius:2px;width:40px;margin-bottom:20px;
+  background:var(--current-model-color,var(--gold));
+}
+
+.clicker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;}
+
+.clicker-card{
+  background:var(--card);border:1px solid var(--card-border);
+  border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  transition:border-color .2s,transform .15s,box-shadow .2s;
+}
+.clicker-card:hover{border-color:var(--current-model-color,var(--gold-dim));transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+.clicker-card.offline{opacity:.5;}
+
+.ss-wrap{width:100%;aspect-ratio:9/18;background:#080808;position:relative;overflow:hidden;}
+.ss-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.ss-placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:6px;color:#2a2a2a;
+}
+.ss-placeholder span{font-size:9px;text-transform:uppercase;letter-spacing:1px;}
+.status-dot{
+  position:absolute;top:8px;right:8px;width:9px;height:9px;
+  border-radius:50%;border:2px solid var(--card);
+}
+.status-dot.on{background:var(--online);box-shadow:0 0 5px var(--online);}
+.status-dot.off{background:var(--offline);}
+.status-dot.unk{background:#333;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.cc-info{padding:10px 11px 12px;border-top:1px solid var(--card-border);}
+.cc-id{font-size:9px;color:var(--gold-dim);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+.cc-poster{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-poster.empty{color:var(--text-dim);font-style:italic;font-weight:400;}
+.cc-accounts{font-size:10px;color:var(--text-dim);line-height:1.6;}
+.cc-account{color:var(--gold-dim);}
+
+/* ── STATUS PAGE ── */
+.status-table{width:100%;border-collapse:collapse;}
+.status-table th{
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-dim);font-weight:700;
+  padding:8px 14px;text-align:left;border-bottom:1px solid #1A1A1A;
+}
+.status-table td{
+  padding:12px 14px;border-bottom:1px solid #0F0F0F;
+  font-size:13px;vertical-align:middle;
+}
+.status-table tr:hover td{background:#0D0D0D;}
+.status-table tr:last-child td{border-bottom:none;}
+.st-status{display:flex;align-items:center;gap:7px;font-weight:700;}
+.st-status.on{color:var(--online);}
+.st-status.off{color:var(--offline);}
+.st-dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+.st-id{font-size:11px;color:var(--gold-dim);font-family:monospace;letter-spacing:1px;}
+.st-model-badge{
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  background:var(--surface2);
+}
+.st-poster{color:var(--text-mid);}
+.st-accounts{font-size:11px;color:var(--text-dim);}
+
+/* ── DEVICE MODAL ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--surface);border:1px solid var(--card-border);border-radius:14px;
+  width:92%;max-width:880px;max-height:88vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  transform:scale(.96);transition:transform .2s;
+}
+.overlay.open .modal{transform:scale(1);}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid #1A1A1A;flex-shrink:0;
+}
+.modal-head-left{display:flex;align-items:center;gap:14px;}
+.mh-id{font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;font-weight:700;}
+.mh-model{font-size:16px;font-weight:800;color:var(--text);}
+.mh-poster{font-size:12px;color:var(--text-mid);}
+.modal-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;}
+.modal-status.on{color:var(--online);}
+.modal-status.off{color:var(--offline);}
+.mclose{
+  width:30px;height:30px;background:var(--surface2);border:1px solid #252525;
+  border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-dim);font-size:16px;transition:all .15s;
+}
+.mclose:hover{background:#222;color:var(--text);}
+.modal-body{display:grid;grid-template-columns:240px 1fr;flex:1;overflow:hidden;}
+.modal-left{
+  background:#0C0C0C;border-right:1px solid #1A1A1A;
+  padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;
+}
+.modal-phone{
+  width:180px;margin:0 auto;border-radius:16px;overflow:hidden;
+  border:3px solid #1E1E1E;background:#000;aspect-ratio:9/18;
+}
+.modal-phone img{width:100%;height:100%;object-fit:cover;display:block;}
+.modal-phone-ph{
+  width:100%;height:100%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;color:#222;
+}
+.mbtn{
+  padding:9px 14px;border-radius:6px;font-size:11px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border:none;
+  transition:all .15s;text-align:center;width:100%;
+}
+.mbtn-outline{background:transparent;border:1px solid var(--card-border);color:var(--text-mid);}
+.mbtn-outline:hover{border-color:var(--gold-dim);color:var(--gold);}
+.mbtn-danger{background:transparent;border:1px solid #3A1515;color:var(--offline);}
+.mbtn-danger:hover{border-color:var(--offline);background:rgba(239,68,68,.08);}
+.modal-right{padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:22px;}
+.msec h3{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-dim);font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #1A1A1A;}
+.mrow{display:flex;align-items:flex-start;gap:12px;padding:7px 0;border-bottom:1px solid #111;}
+.mrow:last-child{border-bottom:none;}
+.mlabel{font-size:11px;color:var(--text-dim);min-width:100px;padding-top:1px;}
+.mval{font-size:13px;color:var(--text);font-weight:500;flex:1;}
+.minput{width:100%;background:#0C0C0C;border:1px solid #252525;border-radius:5px;color:var(--text);font-size:13px;padding:8px 10px;font-family:var(--font);transition:border-color .15s;margin-bottom:10px;}
+.minput:focus{outline:none;border-color:var(--gold-dim);}
+textarea.minput{resize:vertical;min-height:68px;}
+.mbtn-gold{background:var(--gold);color:#000;font-weight:800;border:none;}
+.mbtn-gold:hover{background:var(--gold-light);}
+
+/* ── SETTINGS PAGE ── */
+.settings-wrap{max-width:860px;display:flex;flex-direction:column;gap:20px;}
+.scard{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:22px;}
+.scard h2{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid #1A1A1A;}
+.sfield{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.sfield label{font-size:11px;color:var(--text-dim);}
+.sfield input,.sfield select{background:#0C0C0C;border:1px solid #252525;border-radius:5px;color:var(--text);font-size:13px;padding:9px 12px;font-family:var(--font);width:100%;transition:border-color .15s;}
+.sfield input:focus,.sfield select:focus{outline:none;border-color:var(--gold-dim);}
+.sfield select option{background:#111;}
+
+.devices-settings-grid{display:grid;gap:10px;}
+.dset-row{
+  background:#0C0C0C;border:1px solid #1A1A1A;border-radius:7px;padding:14px;
+  display:grid;grid-template-columns:90px 130px 130px 1fr;gap:10px;align-items:center;
+}
+.dset-id{font-size:10px;color:var(--gold-dim);font-weight:700;letter-spacing:1.5px;font-family:monospace;}
+.dset-input{background:#111;border:1px solid #222;border-radius:4px;color:var(--text);font-size:12px;padding:6px 9px;font-family:var(--font);width:100%;}
+.dset-input:focus{outline:none;border-color:var(--gold-dim);}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--surface);border:1px solid var(--gold-dim);border-radius:8px;
+  padding:11px 18px;font-size:13px;color:var(--text);z-index:999;
+  opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.err{border-color:#5a1a1a;color:var(--offline);}
+.toast.ok{color:var(--gold-light);}
+
+/* ── UTIL ── */
+.btn{padding:8px 16px;border-radius:5px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s;}
+.btn-gold{background:var(--gold);color:#000;}
+.btn-gold:hover{background:var(--gold-light);}
+.btn-outline{background:transparent;border:1px solid var(--gold-dim);color:var(--gold);}
+.btn-outline:hover{background:var(--gold-bg);border-color:var(--gold);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#222;border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--gold-dim);}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
-    <div class="logo-diamond"></div>
+    <div class="logo-mark"></div>
     <h1>Matureminds Clicker Dashboard</h1>
   </div>
-  <div class="header-stats">
-    <div class="stat-pill">
-      <div class="dot"></div>
-      <span class="stat-number" id="stat-online">—</span>
-      <span>online</span>
-    </div>
-    <div class="stat-pill">
-      <div class="dot offline"></div>
-      <span class="stat-number" id="stat-offline">—</span>
-      <span>offline</span>
-    </div>
+  <div class="header-center">
+    <div class="hstat"><div class="hdot on"></div><b id="h-online">—</b> Online</div>
+    <div class="hstat"><div class="hdot off"></div><b id="h-offline">—</b> Offline</div>
+    <div class="hstat">◈ <b id="h-models">—</b> Models</div>
   </div>
   <div class="header-right">
-    <div class="last-refresh" id="last-refresh">Not refreshed yet</div>
+    <span class="htime" id="h-time">—</span>
+    <button class="hbtn" onclick="refreshAll()">↻ Refresh</button>
   </div>
 </header>
 
-<!-- NAV -->
 <nav>
-  <div class="nav-tab active" data-page="wall">Live Wall</div>
-  <div class="nav-tab" data-page="settings">Settings</div>
+  <div class="ntab active" data-page="hub">Hub</div>
+  <div class="ntab" data-page="status">Live Status</div>
+  <div class="ntab" data-page="settings">Settings</div>
 </nav>
 
-<!-- LIVE WALL PAGE -->
-<div class="page active" id="page-wall">
-  <div id="api-warning-wall" class="api-warning" style="display:none">
-    ⚠ No API key set. <a onclick="switchPage('settings')">Go to Settings</a> to add your Nomix API key.
-  </div>
-  <div class="wall-controls">
-    <span class="wall-title">All Devices — Live View</span>
-    <div class="wall-actions">
-      <div class="refresh-toggle">
-        <div class="toggle-switch on" id="auto-refresh-toggle"></div>
-        <span>Auto-refresh</span>
-      </div>
+<!-- HUB -->
+<div class="page active" id="page-hub">
+  <div class="hub-header">
+    <span class="page-label">All Models</span>
+    <div class="hub-actions">
       <button class="btn btn-outline" onclick="refreshAll()">Refresh All</button>
     </div>
   </div>
-  <div class="device-grid" id="device-grid"></div>
+  <div class="model-grid" id="model-grid">
+    <div style="color:var(--text-dim);font-size:13px;grid-column:1/-1;">Loading…</div>
+  </div>
 </div>
 
-<!-- SETTINGS PAGE -->
+<!-- MODEL VIEW (dynamically shown) -->
+<div class="page" id="page-model">
+  <div class="model-view-header">
+    <div class="back-btn" onclick="goHub()">←</div>
+    <div>
+      <div class="mv-title" id="mv-title">Model</div>
+      <div class="mv-subtitle" id="mv-subtitle">— clickers</div>
+    </div>
+  </div>
+  <div class="mv-bar" id="mv-bar"></div>
+  <div class="clicker-grid" id="clicker-grid"></div>
+</div>
+
+<!-- LIVE STATUS -->
+<div class="page" id="page-status">
+  <div class="hub-header">
+    <span class="page-label">All Clickers — Live Status</span>
+    <button class="btn btn-outline" onclick="refreshAll()">Refresh</button>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="status-table">
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Clicker ID</th>
+          <th>Model</th>
+          <th>Poster</th>
+          <th>IG Accounts</th>
+        </tr>
+      </thead>
+      <tbody id="status-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SETTINGS -->
 <div class="page" id="page-settings">
-  <div class="settings-grid">
-    <div class="settings-card">
+  <div class="settings-wrap">
+    <div class="scard">
       <h2>API Configuration</h2>
-      <div class="settings-field">
+      <div class="sfield">
         <label>Nomix API Key</label>
-        <input type="password" id="settings-api-key" placeholder="Paste your API key here">
+        <input type="password" id="s-apikey" placeholder="Paste your API key">
       </div>
-      <div class="settings-field">
+      <div class="sfield">
         <label>Screenshot Refresh Interval</label>
-        <select id="settings-refresh">
+        <select id="s-refresh">
           <option value="5000">Every 5 seconds</option>
           <option value="10000" selected>Every 10 seconds</option>
           <option value="30000">Every 30 seconds</option>
           <option value="60000">Every 60 seconds</option>
         </select>
       </div>
-      <button class="btn btn-gold" onclick="saveConfig()">Save Settings</button>
+      <button class="btn btn-gold" onclick="saveConfig()">Save Config</button>
     </div>
-
-    <div class="settings-card" style="grid-column: 1 / -1;">
-      <h2>Device Labels</h2>
-      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Assign a poster name and Instagram accounts to each clicker. These are saved locally on this server.</p>
-      <div class="device-labels-list" id="device-labels-list">
-        <div style="color:var(--text-dim);font-size:13px;">Loading devices…</div>
-      </div>
+    <div class="scard">
+      <h2>Device Assignments</h2>
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">Edit model, poster and Instagram accounts for each clicker. Changes save immediately.</p>
+      <div class="devices-settings-grid" id="dset-grid">Loading…</div>
       <div style="margin-top:16px;">
-        <button class="btn btn-gold" onclick="saveAllLabels()">Save All Labels</button>
+        <button class="btn btn-gold" onclick="saveAllDeviceSettings()">Save All</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- DEVICE MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div class="modal-title">
+<div class="overlay" id="overlay" onclick="maybeClose(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-left">
         <div>
-          <div class="modal-device-id" id="modal-device-id">—</div>
-          <div class="modal-poster-name" id="modal-poster-name">—</div>
+          <div class="mh-id" id="mh-id">—</div>
+          <div class="mh-model" id="mh-model">—</div>
+          <div class="mh-poster" id="mh-poster">—</div>
         </div>
-        <div id="modal-status-badge" class="status-indicator offline" style="margin-left:16px;">
-          <div class="dot"></div>
-          <span id="modal-status-text">Offline</span>
-        </div>
+        <div class="modal-status off" id="mh-status"><div class="st-dot"></div><span id="mh-status-txt">—</span></div>
       </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+      <button class="mclose" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <!-- Phone screen -->
-      <div class="modal-screen">
-        <div class="modal-screenshot-wrap">
-          <img id="modal-screenshot" src="" alt="Screen" style="display:none">
-          <div id="modal-screenshot-placeholder" class="screenshot-placeholder" style="height:100%">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
-            <span>No screenshot</span>
+      <div class="modal-left">
+        <div class="modal-phone">
+          <img id="m-img" src="" style="display:none">
+          <div class="modal-phone-ph" id="m-ph">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
           </div>
         </div>
-        <div class="modal-screen-actions">
-          <button class="btn btn-outline" onclick="refreshModalScreenshot()" style="width:100%;text-align:center;">
-            ↻ Refresh Screenshot
-          </button>
-          <button class="btn btn-danger" id="restart-btn" onclick="restartDevice()" style="width:100%;text-align:center;">
-            ⟳ Restart Device
-          </button>
-        </div>
+        <button class="mbtn mbtn-outline" onclick="refreshModalShot()">↻ Refresh Screenshot</button>
+        <button class="mbtn mbtn-danger" id="restart-btn" onclick="doRestart()">⟳ Restart Device</button>
       </div>
-      <!-- Info panel -->
-      <div class="modal-panel">
-        <div class="panel-section">
+      <div class="modal-right">
+        <div class="msec">
           <h3>Device Info</h3>
-          <div class="info-row">
-            <span class="info-label">Clicker ID</span>
-            <span class="info-value" id="modal-info-id">—</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Status</span>
-            <span class="info-value" id="modal-info-status">—</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Poster</span>
-            <span class="info-value" id="modal-info-poster">—</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">IG Accounts</span>
-            <span class="info-value" id="modal-info-accounts">—</span>
-          </div>
+          <div class="mrow"><span class="mlabel">Clicker ID</span><span class="mval" id="mi-id">—</span></div>
+          <div class="mrow"><span class="mlabel">Model</span><span class="mval" id="mi-model">—</span></div>
+          <div class="mrow"><span class="mlabel">Poster</span><span class="mval" id="mi-poster">—</span></div>
+          <div class="mrow"><span class="mlabel">IG Accounts</span><span class="mval" id="mi-accounts">—</span></div>
+          <div class="mrow"><span class="mlabel">Status</span><span class="mval" id="mi-status">—</span></div>
         </div>
-        <div class="panel-section">
-          <h3>Edit Labels</h3>
-          <div class="edit-field">
-            <label>Poster Name</label>
-            <input type="text" id="modal-edit-poster" placeholder="e.g. Chris">
-          </div>
-          <div class="edit-field" style="margin-top:12px;">
-            <label>Instagram Accounts (one per line)</label>
-            <textarea id="modal-edit-accounts" placeholder="@lifeoftaffyxo&#10;@taffyexploresxo&#10;@miss_txo"></textarea>
-          </div>
-          <div class="save-label-row">
-            <button class="btn btn-gold" onclick="saveModalLabel()">Save Labels</button>
-          </div>
+        <div class="msec">
+          <h3>Edit Assignment</h3>
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px;">Model</label>
+          <input class="minput" id="me-model" type="text" placeholder="e.g. Taffy">
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px;">Poster</label>
+          <input class="minput" id="me-poster" type="text" placeholder="e.g. Chris">
+          <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px;">IG Accounts (one per line)</label>
+          <textarea class="minput" id="me-accounts" placeholder="@handle1&#10;@handle2"></textarea>
+          <button class="mbtn mbtn-gold" onclick="saveModalLabel()">Save Changes</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── STATE ──
-  let devices = [];
-  let statuses = {};
-  let labels = {};
-  let config = { apiKey: '', refreshInterval: 10000 };
-  let autoRefresh = true;
-  let refreshTimer = null;
-  let activeModal = null;
-  let modalRefreshTimer = null;
+// ── MODEL COLOURS ──
+const MODEL_COLORS = {
+  'Taffy':    '#C9A84C',
+  'Scarlett': '#EF4444',
+  'Lucy':     '#A855F7',
+  'Bianca':   '#3B82F6',
+  'Lily':     '#22C55E',
+  'Stacey':   '#F97316',
+  'Izzy Wu':  '#EC4899',
+  'Warm Up':  '#6B7280',
+  'Unassigned':'#444444',
+};
+function modelColor(m){ return MODEL_COLORS[m] || '#C9A84C'; }
 
-  // ── INIT ──
-  async function init() {
-    await loadConfig();
-    await loadLabels();
-    if (config.apiKey) {
-      await loadDevices();
-      startAutoRefresh();
-    } else {
-      document.getElementById('api-warning-wall').style.display = 'flex';
-    }
-    setupNav();
-    setupToggle();
-    renderSettingsLabels();
-  }
+// ── STATE ──
+let devices = [];
+let statuses = {};
+let labels = {};
+let config = { refreshInterval: 10000 };
+let activeDevice = null;
+let refreshTimer = null;
+let currentModel = null;
 
-  async function loadConfig() {
-    try {
-      const res = await fetch('/api/config');
-      config = { refreshInterval: 10000, ...await res.json() };
-      if (config.apiKey) document.getElementById('settings-api-key').value = config.apiKey;
-      const sel = document.getElementById('settings-refresh');
-      if (config.refreshInterval) sel.value = String(config.refreshInterval);
-    } catch {}
-  }
+// ── INIT ──
+async function init(){
+  await Promise.all([loadConfig(), loadLabels()]);
+  await loadDevices();
+  setupNav();
+  startRefresh();
+}
 
-  async function loadLabels() {
-    try {
-      const res = await fetch('/api/labels');
-      labels = await res.json();
-    } catch {}
-  }
+async function loadConfig(){
+  try{
+    const r = await fetch('/api/config');
+    config = { refreshInterval:10000, ...await r.json() };
+    if(config.apiKey) document.getElementById('s-apikey').value = config.apiKey;
+    document.getElementById('s-refresh').value = String(config.refreshInterval || 10000);
+  }catch{}
+}
 
-  async function loadDevices() {
-    try {
-      const res = await fetch('/api/devices');
-      if (!res.ok) { showApiWarning(); return; }
-      devices = await res.json();
-      document.getElementById('api-warning-wall').style.display = 'none';
-      await refreshStatuses();
-      renderGrid();
-      renderSettingsLabels();
-    } catch { showApiWarning(); }
-  }
+async function loadLabels(){
+  try{ labels = await fetch('/api/labels').then(r=>r.json()); }catch{}
+}
 
-  function showApiWarning() {
-    document.getElementById('api-warning-wall').style.display = 'flex';
-  }
-
-  // ── STATUSES ──
-  async function refreshStatuses() {
-    try {
-      const res = await fetch('/api/statuses');
-      if (!res.ok) return;
-      const results = await res.json();
-      results.forEach(r => { statuses[r.device_id] = r.connected; });
-      updateHeaderStats();
-      updateGridStatuses();
-      document.getElementById('last-refresh').textContent = 'Updated ' + new Date().toLocaleTimeString();
-    } catch {}
-  }
-
-  function updateHeaderStats() {
-    const ids = Object.keys(statuses);
-    const online = ids.filter(id => statuses[id]).length;
-    const offline = ids.filter(id => !statuses[id]).length;
-    document.getElementById('stat-online').textContent = online;
-    document.getElementById('stat-offline').textContent = offline;
-  }
-
-  // ── GRID ──
-  function renderGrid() {
-    const grid = document.getElementById('device-grid');
-    grid.innerHTML = '';
-    devices.forEach(id => {
-      const card = buildCard(id);
-      grid.appendChild(card);
-    });
-    refreshScreenshots();
-  }
-
-  function buildCard(id) {
-    const label = labels[id] || {};
-    const connected = statuses[id];
-    const statusClass = connected === undefined ? 'loading' : connected ? 'online' : 'offline';
-    const poster = label.poster || '';
-    const accounts = label.accounts ? label.accounts.split('\n').filter(Boolean) : [];
-
-    const card = document.createElement('div');
-    card.className = `device-card${connected === false ? ' offline' : ''}`;
-    card.dataset.id = id;
-    card.onclick = () => openModal(id);
-
-    const accountsHtml = accounts.length
-      ? accounts.map(a => `<span class="account-tag">${a.startsWith('@') ? a : '@' + a}</span>`).join('<br>')
-      : '<span style="color:#333;font-style:italic">No accounts set</span>';
-
-    card.innerHTML = `
-      <div class="screenshot-wrap">
-        <img id="img-${id}" src="" alt="" style="display:none" loading="lazy">
-        <div id="ph-${id}" class="screenshot-placeholder">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
-          <span>Loading…</span>
-        </div>
-        <div class="status-badge ${statusClass}" id="badge-${id}"></div>
-      </div>
-      <div class="card-info">
-        <div class="card-device-id">${id}</div>
-        <div class="card-poster ${poster ? '' : 'empty'}">${poster || 'No poster assigned'}</div>
-        <div class="card-accounts">${accountsHtml}</div>
-      </div>`;
-    return card;
-  }
-
-  function updateGridStatuses() {
-    devices.forEach(id => {
-      const badge = document.getElementById(`badge-${id}`);
-      const card = document.querySelector(`.device-card[data-id="${id}"]`);
-      if (!badge || !card) return;
-      const connected = statuses[id];
-      badge.className = `status-badge ${connected ? 'online' : 'offline'}`;
-      if (connected === false) card.classList.add('offline');
-      else card.classList.remove('offline');
-    });
-  }
-
-  // ── SCREENSHOTS ──
-  async function refreshScreenshots() {
-    const onlineDevices = devices.filter(id => statuses[id] !== false);
-    await Promise.all(onlineDevices.map(id => loadScreenshot(id)));
-  }
-
-  async function loadScreenshot(id) {
-    if (statuses[id] === false) return;
-    try {
-      const url = `/api/devices/${id}/screenshot?t=${Date.now()}`;
-      const img = document.getElementById(`img-${id}`);
-      const ph = document.getElementById(`ph-${id}`);
-      if (!img) return;
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      if (img._prevBlob) URL.revokeObjectURL(img._prevBlob);
-      img._prevBlob = blobUrl;
-      img.src = blobUrl;
-      img.style.display = 'block';
-      if (ph) ph.style.display = 'none';
-    } catch {}
-  }
-
-  async function refreshAll() {
+async function loadDevices(){
+  try{
+    const r = await fetch('/api/devices');
+    if(!r.ok) return;
+    devices = await r.json();
     await refreshStatuses();
-    await refreshScreenshots();
-  }
+    renderHub();
+    renderStatusTable();
+    renderDeviceSettings();
+  }catch(e){ console.error(e); }
+}
 
-  // ── AUTO REFRESH ──
-  function startAutoRefresh() {
-    clearInterval(refreshTimer);
-    if (!autoRefresh) return;
-    const interval = config.refreshInterval || 10000;
-    refreshTimer = setInterval(() => {
-      refreshStatuses();
-      refreshScreenshots();
-    }, interval);
-  }
+// ── STATUSES ──
+async function refreshStatuses(){
+  try{
+    const results = await fetch('/api/statuses').then(r=>r.json());
+    if(!Array.isArray(results)) return;
+    results.forEach(r => { statuses[r.device_id] = r.connected; });
+    updateHeaderStats();
+    document.getElementById('h-time').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  }catch{}
+}
 
-  function setupToggle() {
-    const toggle = document.getElementById('auto-refresh-toggle');
-    toggle.onclick = () => {
-      autoRefresh = !autoRefresh;
-      toggle.classList.toggle('on', autoRefresh);
-      if (autoRefresh) startAutoRefresh();
-      else clearInterval(refreshTimer);
-    };
-  }
+function updateHeaderStats(){
+  const ids = Object.keys(statuses);
+  document.getElementById('h-online').textContent = ids.filter(i=>statuses[i]).length;
+  document.getElementById('h-offline').textContent = ids.filter(i=>!statuses[i]).length;
+  // Count unique models
+  const models = new Set(devices.map(id => (labels[id]||{}).model).filter(Boolean).filter(m=>m!=='Unassigned'&&m!=='Warm Up'));
+  document.getElementById('h-models').textContent = models.size;
+}
 
-  // ── MODAL ──
-  function openModal(id) {
-    activeModal = id;
-    const label = labels[id] || {};
+// ── HUB ──
+function getModels(){
+  const map = {};
+  devices.forEach(id => {
+    const l = labels[id] || {};
+    const model = l.model || 'Unassigned';
+    if(!map[model]) map[model] = [];
+    map[model].push(id);
+  });
+  return map;
+}
+
+function renderHub(){
+  const map = getModels();
+  const grid = document.getElementById('model-grid');
+  // Sort: real models first, then Warm Up, then Unassigned
+  const order = ['Taffy','Scarlett','Lucy','Bianca','Lily','Stacey','Izzy Wu','Warm Up','Unassigned'];
+  const sorted = Object.keys(map).sort((a,b)=>{
+    const ai = order.indexOf(a), bi = order.indexOf(b);
+    if(ai===-1&&bi===-1) return a.localeCompare(b);
+    if(ai===-1) return 1; if(bi===-1) return -1;
+    return ai-bi;
+  });
+  grid.innerHTML = sorted.map(model => buildModelCard(model, map[model])).join('');
+}
+
+function buildModelCard(model, ids){
+  const color = modelColor(model);
+  const online = ids.filter(id=>statuses[id]===true).length;
+  const offline = ids.filter(id=>statuses[id]===false).length;
+  const unknown = ids.length - online - offline;
+  const allOn = offline===0 && unknown===0;
+  const allOff = online===0 && unknown===0;
+  const statusClass = allOn?'all-on':allOff?'all-off':'some-off';
+  const statusTxt = allOn?`${online}/${ids.length} Online`:allOff?'All Offline':`${online}/${ids.length} Online`;
+
+  // Unique posters
+  const posters = [...new Set(ids.map(id=>(labels[id]||{}).poster).filter(Boolean))];
+  // All IG accounts
+  const allAccounts = ids.flatMap(id=>((labels[id]||{}).accounts||'').split('\n').filter(Boolean));
+  const accountsPreview = allAccounts.slice(0,6);
+
+  const dots = ids.map(id=>{
+    const s = statuses[id];
+    const cls = s===true?'on':s===false?'off':'unk';
+    return `<div class="mc-clicker-dot ${cls}" title="${id}"></div>`;
+  }).join('');
+
+  return `
+  <div class="model-card" style="--model-color:${color}" onclick="openModel('${model}')">
+    <div class="mc-top">
+      <div class="mc-name">${model}</div>
+      <div class="mc-status-pill ${statusClass}"><div class="dot"></div>${statusTxt}</div>
+    </div>
+    <div class="mc-stats">
+      <div class="mc-stat"><div class="mc-stat-n">${ids.length}</div><div class="mc-stat-l">Clickers</div></div>
+      <div class="mc-stat"><div class="mc-stat-n">${allAccounts.length}</div><div class="mc-stat-l">IG Pages</div></div>
+      <div class="mc-stat"><div class="mc-stat-n">${posters.length}</div><div class="mc-stat-l">Posters</div></div>
+    </div>
+    <div class="mc-divider"></div>
+    <div class="mc-posters">${posters.map(p=>`<span class="poster-chip">${p}</span>`).join('')||'<span style="font-size:11px;color:var(--text-dim)">No posters assigned</span>'}</div>
+    <div class="mc-accounts">${accountsPreview.map(a=>`<span class="mc-account-tag">${a.startsWith('@')?a:'@'+a}</span>`).join(' ')}${allAccounts.length>6?` <span style="color:#444">+${allAccounts.length-6} more</span>`:''}</div>
+    <div class="mc-footer">
+      <span class="mc-view-btn">View All Clickers</span>
+      <div class="mc-clicker-dots">${dots}</div>
+    </div>
+  </div>`;
+}
+
+// ── MODEL VIEW ──
+function openModel(model){
+  currentModel = model;
+  const color = modelColor(model);
+  const map = getModels();
+  const ids = map[model] || [];
+  const online = ids.filter(id=>statuses[id]===true).length;
+
+  document.getElementById('mv-title').textContent = model;
+  document.getElementById('mv-subtitle').textContent = `${ids.length} clicker${ids.length!==1?'s':''} · ${online} online`;
+  document.getElementById('mv-bar').style.background = color;
+  document.documentElement.style.setProperty('--current-model-color', color);
+
+  const grid = document.getElementById('clicker-grid');
+  grid.innerHTML = ids.map(id => buildClickerCard(id)).join('');
+  switchPage('model');
+
+  // Load screenshots for these devices
+  ids.forEach(id => { if(statuses[id]!==false) loadShot(id, `shot-${id}`, `ph-${id}`); });
+}
+
+function buildClickerCard(id){
+  const l = labels[id]||{};
+  const connected = statuses[id];
+  const statusCls = connected===true?'on':connected===false?'off':'unk';
+  const accounts = (l.accounts||'').split('\n').filter(Boolean);
+  const accountsHtml = accounts.length
+    ? accounts.map(a=>`<span class="cc-account">${a.startsWith('@')?a:'@'+a}</span>`).join('<br>')
+    : '<span style="color:#2a2a2a;font-style:italic">No accounts</span>';
+
+  return `
+  <div class="clicker-card ${connected===false?'offline':''}" onclick="openDevice('${id}')">
+    <div class="ss-wrap">
+      <img id="shot-${id}" src="" style="display:none">
+      <div id="ph-${id}" class="ss-placeholder">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
+        <span>${connected===false?'Offline':'Loading'}</span>
+      </div>
+      <div class="status-dot ${statusCls}"></div>
+    </div>
+    <div class="cc-info">
+      <div class="cc-id">${id}</div>
+      <div class="cc-poster ${l.poster?'':'empty'}">${l.poster||'No poster'}</div>
+      <div class="cc-accounts">${accountsHtml}</div>
+    </div>
+  </div>`;
+}
+
+function goHub(){
+  switchPage('hub');
+  currentModel = null;
+}
+
+// ── STATUS TABLE ──
+function renderStatusTable(){
+  const tbody = document.getElementById('status-tbody');
+  tbody.innerHTML = [...devices].sort((a,b)=>{
+    const ma = (labels[a]||{}).model||'z';
+    const mb = (labels[b]||{}).model||'z';
+    return ma.localeCompare(mb);
+  }).map(id=>{
+    const l = labels[id]||{};
     const connected = statuses[id];
-    const poster = label.poster || 'No poster assigned';
-    const accounts = label.accounts || '';
+    const statusCls = connected===true?'on':'off';
+    const statusTxt = connected===true?'Online':connected===false?'Offline':'Unknown';
+    const color = modelColor(l.model||'Unassigned');
+    const accounts = (l.accounts||'').split('\n').filter(Boolean);
+    return `
+    <tr>
+      <td><div class="st-status ${statusCls}"><div class="st-dot"></div>${statusTxt}</div></td>
+      <td><span class="st-id">${id}</span></td>
+      <td><span class="st-model-badge" style="color:${color}">${l.model||'—'}</span></td>
+      <td class="st-poster">${l.poster||'—'}</td>
+      <td class="st-accounts">${accounts.map(a=>a.startsWith('@')?a:'@'+a).join(', ')||'—'}</td>
+    </tr>`;
+  }).join('');
+}
 
-    document.getElementById('modal-device-id').textContent = id;
-    document.getElementById('modal-poster-name').textContent = poster;
-    document.getElementById('modal-info-id').textContent = id;
-    document.getElementById('modal-info-poster').textContent = poster;
-    document.getElementById('modal-info-accounts').textContent = accounts
-      ? accounts.split('\n').filter(Boolean).join(', ')
-      : 'None set';
+// ── DEVICE MODAL ──
+function openDevice(id){
+  activeDevice = id;
+  const l = labels[id]||{};
+  const connected = statuses[id];
 
-    const statusEl = document.getElementById('modal-status-badge');
-    const statusText = document.getElementById('modal-status-text');
-    const infoStatus = document.getElementById('modal-info-status');
-    if (connected) {
-      statusEl.className = 'status-indicator online';
-      statusText.textContent = 'Online';
-      infoStatus.textContent = 'Online';
-    } else {
-      statusEl.className = 'status-indicator offline';
-      statusText.textContent = 'Offline';
-      infoStatus.textContent = 'Offline';
+  document.getElementById('mh-id').textContent = id;
+  document.getElementById('mh-model').textContent = l.model||'Unassigned';
+  document.getElementById('mh-poster').textContent = l.poster ? `Poster: ${l.poster}` : 'No poster assigned';
+  document.getElementById('mi-id').textContent = id;
+  document.getElementById('mi-model').textContent = l.model||'—';
+  document.getElementById('mi-poster').textContent = l.poster||'—';
+  document.getElementById('mi-accounts').textContent = (l.accounts||'').split('\n').filter(Boolean).join(', ')||'None';
+
+  const statusEl = document.getElementById('mh-status');
+  const statusTxt = document.getElementById('mh-status-txt');
+  const miStatus = document.getElementById('mi-status');
+  if(connected===true){statusEl.className='modal-status on';statusTxt.textContent='Online';miStatus.textContent='Online';}
+  else{statusEl.className='modal-status off';statusTxt.textContent='Offline';miStatus.textContent='Offline';}
+
+  document.getElementById('me-model').value = l.model||'';
+  document.getElementById('me-poster').value = l.poster||'';
+  document.getElementById('me-accounts').value = l.accounts||'';
+
+  const img = document.getElementById('m-img');
+  const ph = document.getElementById('m-ph');
+  img.style.display='none'; ph.style.display='flex';
+
+  document.getElementById('overlay').classList.add('open');
+  if(connected!==false) refreshModalShot();
+}
+
+async function refreshModalShot(){
+  if(!activeDevice) return;
+  try{
+    const res = await fetch(`/api/devices/${activeDevice}/screenshot?t=${Date.now()}`);
+    if(!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const img = document.getElementById('m-img');
+    if(img._prev) URL.revokeObjectURL(img._prev);
+    img._prev = url; img.src = url; img.style.display='block';
+    document.getElementById('m-ph').style.display='none';
+  }catch{}
+}
+
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); activeDevice=null; }
+function maybeClose(e){ if(e.target===document.getElementById('overlay')) closeModal(); }
+
+async function doRestart(){
+  if(!activeDevice) return;
+  const btn = document.getElementById('restart-btn');
+  btn.textContent='Restarting…'; btn.disabled=true;
+  try{
+    const r = await fetch(`/api/devices/${activeDevice}/restart`,{method:'POST'});
+    const d = await r.json();
+    toast(d.success?'Device restarted':'Restart failed', d.success?'ok':'err');
+  }catch{ toast('Restart failed','err'); }
+  btn.textContent='⟳ Restart Device'; btn.disabled=false;
+}
+
+async function saveModalLabel(){
+  if(!activeDevice) return;
+  const model = document.getElementById('me-model').value.trim();
+  const poster = document.getElementById('me-poster').value.trim();
+  const accounts = document.getElementById('me-accounts').value.trim();
+  try{
+    await fetch(`/api/labels/${activeDevice}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,poster,accounts})});
+    labels[activeDevice]={model,poster,accounts};
+    document.getElementById('mh-model').textContent = model||'Unassigned';
+    document.getElementById('mh-poster').textContent = poster?`Poster: ${poster}`:'No poster assigned';
+    document.getElementById('mi-model').textContent = model||'—';
+    document.getElementById('mi-poster').textContent = poster||'—';
+    document.getElementById('mi-accounts').textContent = accounts.split('\n').filter(Boolean).join(', ')||'None';
+    renderHub(); renderStatusTable(); renderDeviceSettings();
+    toast('Saved','ok');
+  }catch{ toast('Failed to save','err'); }
+}
+
+// ── SCREENSHOTS ──
+async function loadShot(id, imgId, phId){
+  if(statuses[id]===false) return;
+  try{
+    const res = await fetch(`/api/devices/${id}/screenshot?t=${Date.now()}`);
+    if(!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const img = document.getElementById(imgId);
+    const ph = document.getElementById(phId);
+    if(!img) return;
+    if(img._prev) URL.revokeObjectURL(img._prev);
+    img._prev = url; img.src = url; img.style.display='block';
+    if(ph) ph.style.display='none';
+  }catch{}
+}
+
+async function refreshAll(){
+  await refreshStatuses();
+  renderHub();
+  renderStatusTable();
+  // If on model view, refresh those shots
+  if(currentModel){
+    const map = getModels();
+    const ids = map[currentModel]||[];
+    // Rebuild grid to reflect new statuses
+    const grid = document.getElementById('clicker-grid');
+    grid.innerHTML = ids.map(id=>buildClickerCard(id)).join('');
+    ids.forEach(id=>{ if(statuses[id]!==false) loadShot(id,`shot-${id}`,`ph-${id}`); });
+    const online = ids.filter(id=>statuses[id]===true).length;
+    document.getElementById('mv-subtitle').textContent = `${ids.length} clicker${ids.length!==1?'s':''} · ${online} online`;
+  }
+}
+
+function startRefresh(){
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(async()=>{
+    await refreshStatuses();
+    renderHub();
+    renderStatusTable();
+    if(currentModel){
+      const map = getModels();
+      const ids = (map[currentModel]||[]).filter(id=>statuses[id]!==false);
+      ids.forEach(id=>loadShot(id,`shot-${id}`,`ph-${id}`));
     }
+  }, config.refreshInterval||10000);
+}
 
-    document.getElementById('modal-edit-poster').value = label.poster || '';
-    document.getElementById('modal-edit-accounts').value = label.accounts || '';
+// ── SETTINGS ──
+function renderDeviceSettings(){
+  const grid = document.getElementById('dset-grid');
+  if(!devices.length){grid.innerHTML='<div style="color:var(--text-dim);font-size:13px;">No devices loaded.</div>';return;}
+  grid.innerHTML = devices.map(id=>{
+    const l = labels[id]||{};
+    return `
+    <div class="dset-row">
+      <div class="dset-id">${id}</div>
+      <input class="dset-input" id="ds-model-${id}" placeholder="Model" value="${esc(l.model||'')}">
+      <input class="dset-input" id="ds-poster-${id}" placeholder="Poster" value="${esc(l.poster||'')}">
+      <input class="dset-input" id="ds-accounts-${id}" placeholder="@acc1, @acc2" value="${esc((l.accounts||'').replace(/\n/g,', '))}">
+    </div>`;
+  }).join('');
+}
 
-    // Reset screenshot
-    const modalImg = document.getElementById('modal-screenshot');
-    const modalPh = document.getElementById('modal-screenshot-placeholder');
-    modalImg.style.display = 'none';
-    modalPh.style.display = 'flex';
-
-    document.getElementById('modal-overlay').classList.add('open');
-    refreshModalScreenshot();
+async function saveAllDeviceSettings(){
+  for(const id of devices){
+    const model = document.getElementById(`ds-model-${id}`)?.value.trim()||'';
+    const poster = document.getElementById(`ds-poster-${id}`)?.value.trim()||'';
+    const raw = document.getElementById(`ds-accounts-${id}`)?.value.trim()||'';
+    const accounts = raw.replace(/,\s*/g,'\n');
+    await fetch(`/api/labels/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,poster,accounts})});
+    labels[id]={model,poster,accounts};
   }
+  renderHub(); renderStatusTable();
+  toast('All saved','ok');
+}
 
-  async function refreshModalScreenshot() {
-    if (!activeModal) return;
-    const id = activeModal;
-    try {
-      const res = await fetch(`/api/devices/${id}/screenshot?t=${Date.now()}`);
-      if (!res.ok) return;
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const img = document.getElementById('modal-screenshot');
-      const ph = document.getElementById('modal-screenshot-placeholder');
-      if (img._prevBlob) URL.revokeObjectURL(img._prevBlob);
-      img._prevBlob = url;
-      img.src = url;
-      img.style.display = 'block';
-      ph.style.display = 'none';
-    } catch {}
-  }
+async function saveConfig(){
+  const apiKey = document.getElementById('s-apikey').value.trim();
+  const refreshInterval = parseInt(document.getElementById('s-refresh').value);
+  await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({apiKey,refreshInterval})});
+  config.refreshInterval = refreshInterval;
+  startRefresh();
+  if(apiKey){ await loadDevices(); }
+  toast('Settings saved','ok');
+}
 
-  function closeModal(e) {
-    if (e && e.target !== document.getElementById('modal-overlay')) return;
-    document.getElementById('modal-overlay').classList.remove('open');
-    clearInterval(modalRefreshTimer);
-    activeModal = null;
-  }
+// ── NAV ──
+function setupNav(){
+  document.querySelectorAll('.ntab').forEach(t=>{
+    t.onclick=()=>{ if(t.dataset.page==='model'&&!currentModel) return; switchPage(t.dataset.page); };
+  });
+}
 
-  async function restartDevice() {
-    if (!activeModal) return;
-    const btn = document.getElementById('restart-btn');
-    btn.textContent = 'Restarting…';
-    btn.disabled = true;
-    try {
-      const res = await fetch(`/api/devices/${activeModal}/restart`, { method: 'POST' });
-      const data = await res.json();
-      showToast(data.success ? 'Device restarted' : 'Restart failed', data.success ? 'success' : 'error');
-    } catch { showToast('Restart failed', 'error'); }
-    btn.textContent = '⟳ Restart Device';
-    btn.disabled = false;
-  }
+function switchPage(p){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.toggle('active',t.dataset.page===p));
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.toggle('active',pg.id===`page-${p}`));
+}
 
-  async function saveModalLabel() {
-    if (!activeModal) return;
-    const poster = document.getElementById('modal-edit-poster').value.trim();
-    const accounts = document.getElementById('modal-edit-accounts').value.trim();
-    try {
-      await fetch(`/api/labels/${activeModal}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ poster, accounts })
-      });
-      labels[activeModal] = { poster, accounts };
-      updateCardLabel(activeModal);
-      document.getElementById('modal-poster-name').textContent = poster || 'No poster assigned';
-      document.getElementById('modal-info-poster').textContent = poster || 'No poster assigned';
-      document.getElementById('modal-info-accounts').textContent = accounts
-        ? accounts.split('\n').filter(Boolean).join(', ')
-        : 'None set';
-      showToast('Labels saved', 'success');
-      renderSettingsLabels();
-    } catch { showToast('Failed to save', 'error'); }
-  }
+// ── UTILS ──
+function toast(msg, type='ok'){
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.className=`toast ${type} show`;
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function updateCardLabel(id) {
-    const card = document.querySelector(`.device-card[data-id="${id}"]`);
-    if (!card) return;
-    const label = labels[id] || {};
-    const poster = label.poster || '';
-    const accounts = label.accounts ? label.accounts.split('\n').filter(Boolean) : [];
-    const posterEl = card.querySelector('.card-poster');
-    const accountsEl = card.querySelector('.card-accounts');
-    if (posterEl) {
-      posterEl.textContent = poster || 'No poster assigned';
-      posterEl.className = `card-poster ${poster ? '' : 'empty'}`;
-    }
-    if (accountsEl) {
-      accountsEl.innerHTML = accounts.length
-        ? accounts.map(a => `<span class="account-tag">${a.startsWith('@') ? a : '@' + a}</span>`).join('<br>')
-        : '<span style="color:#333;font-style:italic">No accounts set</span>';
-    }
-  }
-
-  // ── SETTINGS ──
-  function renderSettingsLabels() {
-    const list = document.getElementById('device-labels-list');
-    if (!devices.length) { list.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">No devices loaded yet. Set your API key and refresh.</div>'; return; }
-    list.innerHTML = devices.map(id => {
-      const label = labels[id] || {};
-      return `
-        <div class="device-label-row">
-          <div class="device-label-id">${id}</div>
-          <input type="text" id="lbl-poster-${id}" placeholder="Poster name" value="${escapeHtml(label.poster || '')}">
-          <input type="text" id="lbl-accounts-${id}" placeholder="@account1, @account2" value="${escapeHtml((label.accounts || '').replace(/\n/g, ', '))}">
-        </div>`;
-    }).join('');
-  }
-
-  async function saveAllLabels() {
-    for (const id of devices) {
-      const posterInput = document.getElementById(`lbl-poster-${id}`);
-      const accountsInput = document.getElementById(`lbl-accounts-${id}`);
-      if (!posterInput) continue;
-      const poster = posterInput.value.trim();
-      const accountsRaw = accountsInput.value.trim();
-      const accounts = accountsRaw.replace(/,\s*/g, '\n');
-      await fetch(`/api/labels/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ poster, accounts })
-      });
-      labels[id] = { poster, accounts };
-    }
-    devices.forEach(id => updateCardLabel(id));
-    showToast('All labels saved', 'success');
-  }
-
-  async function saveConfig() {
-    const apiKey = document.getElementById('settings-api-key').value.trim();
-    const refreshInterval = parseInt(document.getElementById('settings-refresh').value);
-    await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey, refreshInterval })
-    });
-    config.apiKey = apiKey;
-    config.refreshInterval = refreshInterval;
-    showToast('Settings saved', 'success');
-    if (apiKey) {
-      await loadDevices();
-      clearInterval(refreshTimer);
-      startAutoRefresh();
-    }
-  }
-
-  // ── NAVIGATION ──
-  function setupNav() {
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.onclick = () => switchPage(tab.dataset.page);
-    });
-  }
-
-  function switchPage(page) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
-    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === `page-${page}`));
-  }
-
-  // ── UTILS ──
-  function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.className = `toast ${type} show`;
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  // ── START ──
-  init();
+init();
 </script>
 </body>
 </html>
