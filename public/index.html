@@ -202,47 +202,117 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh
 /* ─── MODEL VIEW ─── */
 .mv-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 .mv-back{
-  width:34px;height:34px;border-radius:8px;cursor:pointer;
+  width:36px;height:36px;border-radius:9px;cursor:pointer;
   background:var(--card);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  color:var(--text-2);font-size:15px;transition:all .15s;flex-shrink:0;
+  color:var(--text-2);font-size:16px;transition:all .15s;flex-shrink:0;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
 }
 .mv-back:hover{border-color:var(--green);color:var(--green);}
 .mv-title-wrap{}
-.mv-title{font-size:20px;font-weight:800;color:var(--text);}
-.mv-subtitle{font-size:12px;color:var(--text-3);margin-top:2px;}
+.mv-title{font-size:22px;font-weight:800;color:var(--text);}
+.mv-subtitle{font-size:12px;color:var(--text-3);margin-top:3px;display:flex;align-items:center;gap:8px;}
+.mv-live-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.25);
+  color:var(--green);font-size:10px;font-weight:700;letter-spacing:.5px;
+  padding:2px 8px;border-radius:20px;
+}
+.mv-live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:livepulse 1.2s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
 
-.phone-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.phone-wall{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:16px;
+  align-items:start;
+}
 
 .pc{
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  overflow:hidden;cursor:pointer;transition:all .2s;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
 }
-.pc:hover{border-color:var(--green);box-shadow:0 4px 20px rgba(0,0,0,.4);transform:translateY(-1px);}
-.pc.offline{opacity:.4;pointer-events:none;}
+.pc:hover{
+  border-color:var(--green);
+  box-shadow:0 10px 40px rgba(22,163,74,.18);
+  transform:translateY(-3px);
+}
+.pc.offline{opacity:.35;pointer-events:none;filter:grayscale(1);}
 
-.pc-screen{width:100%;aspect-ratio:9/18;background:#1a1a1a;position:relative;overflow:hidden;}
-.pc-screen img{width:100%;height:100%;object-fit:cover;display:block;}
+/* phone bezel */
+.pc-bezel{
+  background:#0f0f0f;
+  padding:10px 10px 8px;
+  position:relative;
+}
+.pc-bezel-top{
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:7px;
+}
+.pc-notch{width:52px;height:5px;background:#1e1e1e;border-radius:3px;}
+.pc-screen{
+  width:100%;aspect-ratio:336/720;
+  background:#111;
+  border-radius:8px;
+  position:relative;overflow:hidden;
+}
+.pc-img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  border-radius:8px;
+  transition:opacity .12s ease;
+}
+.pc-img.fading{opacity:.6;}
 .pc-screen-ph{
-  width:100%;height:100%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:5px;
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
 }
-.pc-screen-ph svg{color:#444;}
-.pc-screen-ph span{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;}
+.pc-screen-ph svg{color:#333;}
+.pc-screen-ph span{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+.pc-bezel-bot{
+  display:flex;align-items:center;justify-content:center;
+  margin-top:7px;
+}
+.pc-home{width:24px;height:24px;border-radius:50%;border:2px solid #222;}
+
+/* status dot overlaid on screen */
 .pc-sdot{
-  position:absolute;top:7px;right:7px;width:8px;height:8px;
-  border-radius:50%;border:2px solid var(--card);
+  position:absolute;top:8px;right:8px;width:9px;height:9px;
+  border-radius:50%;border:2px solid #0f0f0f;z-index:2;
 }
-.pc-sdot.on{background:var(--green);box-shadow:0 0 5px var(--green);}
-.pc-sdot.off{background:var(--red);}
-.pc-sdot.unk{background:#ccc;animation:pulse 1.5s infinite;}
+.pc-sdot.on{background:var(--green);box-shadow:0 0 6px var(--green);}
+.pc-sdot.off{background:#dc2626;}
+.pc-sdot.unk{background:#888;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.2;}}
 
-.pc-info{padding:9px 10px 10px;border-top:1px solid var(--border);}
-.pc-id{font-size:9px;color:var(--text-3);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
-.pc-poster{font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pc-accs{font-size:10px;color:var(--text-3);line-height:1.6;}
-.pc-acc-tag{color:var(--green);}
+/* updating indicator */
+.pc-updating{
+  position:absolute;bottom:8px;left:8px;z-index:2;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);opacity:0;
+  transition:opacity .15s;
+}
+.pc-updating.flash{opacity:1;}
+
+/* info bar below bezel */
+.pc-bar{
+  padding:12px 14px 13px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.pc-bar-info{flex:1;min-width:0;}
+.pc-bar-poster{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-bar-accs{font-size:10px;color:var(--text-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-bar-tag{color:var(--green);font-weight:500;}
+.pc-bar-status{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.pc-bar-online{font-size:10px;font-weight:600;color:var(--green);}
+.pc-bar-offline{font-size:10px;font-weight:600;color:var(--red);}
+.pc-bar-id{font-size:9px;color:var(--text-3);letter-spacing:.8px;text-transform:uppercase;}
 
 /* ─── STATUS TABLE ─── */
 .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
@@ -759,7 +829,10 @@ function buildMC(model,ids){
 }
 
 // ── MODEL VIEW ──
+const liveGen={}; // deviceId → generation number; mismatch = loop should stop
+
 function openModel(model){
+  stopAllLiveLoops();
   currentModel=model;
   const color=mc(model);
   const map=getModelMap();
@@ -767,12 +840,15 @@ function openModel(model){
   const on=ids.filter(id=>statuses[id]===true).length;
   document.getElementById('mv-title').textContent=model;
   document.getElementById('mv-title').style.color=color;
-  document.getElementById('mv-sub').textContent=`${ids.length} clicker${ids.length!==1?'s':''} · ${on} online now`;
+  document.getElementById('mv-sub').innerHTML=
+    `${ids.length} clicker${ids.length!==1?'s':''} · ${on} online &nbsp;`+
+    `<span class="mv-live-badge"><span class="mv-live-dot"></span>LIVE</span>`;
   document.getElementById('tb-sep').style.display='';
   document.getElementById('tb-crumb').textContent=model;
   document.getElementById('phone-wall').innerHTML=ids.map(id=>buildPC(id,color)).join('');
   showView('model');
-  ids.forEach(id=>{if(statuses[id]!==false)loadShot(id,`pss-${id}`,`pph-${id}`);});
+  // start continuous live loop for each online device
+  ids.forEach(id=>{if(statuses[id]!==false)startLiveLoop(id);});
 }
 
 function buildPC(id,color){
@@ -780,25 +856,75 @@ function buildPC(id,color){
   const s=statuses[id];
   const sc=s===true?'on':s===false?'off':'unk';
   const accs=(l.accounts||'').split('\n').filter(Boolean);
-  const accHtml=accs.slice(0,3).map(a=>`<span class="pc-acc-tag" style="color:${color}">${a.startsWith('@')?a:'@'+a}</span>`).join('<br>')+(accs.length>3?`<span style="color:var(--text-3)"> +${accs.length-3}</span>`:'');
+  const accTagged=accs.map(a=>`<span class="pc-bar-tag">${a.startsWith('@')?a:'@'+a}</span>`).join(' ');
   return`<div class="pc ${s===false?'offline':''}" onclick="openDevice('${id}')">
-    <div class="pc-screen">
-      <img id="pss-${id}" src="" style="display:none">
-      <div id="pph-${id}" class="pc-screen-ph">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
-        <span>${s===false?'Offline':'Loading'}</span>
+    <div class="pc-bezel">
+      <div class="pc-bezel-top"><div class="pc-notch"></div></div>
+      <div class="pc-screen">
+        <img id="pss-${id}" class="pc-img" style="display:none">
+        <div id="pph-${id}" class="pc-screen-ph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
+          <span>${s===false?'Offline':'Loading…'}</span>
+        </div>
+        <div class="pc-sdot ${sc}" id="psd-${id}"></div>
+        <div class="pc-updating" id="pup-${id}"></div>
       </div>
-      <div class="pc-sdot ${sc}"></div>
+      <div class="pc-bezel-bot"><div class="pc-home"></div></div>
     </div>
-    <div class="pc-info">
-      <div class="pc-id">${id}</div>
-      <div class="pc-poster">${l.poster||'No poster'}</div>
-      <div class="pc-accs">${accHtml||'<span style="color:var(--text-3)">No accounts</span>'}</div>
+    <div class="pc-bar">
+      <div class="pc-bar-info">
+        <div class="pc-bar-poster">${l.poster||'No poster'}</div>
+        <div class="pc-bar-accs">${accTagged||'<span style="color:var(--text-3)">No accounts</span>'}</div>
+      </div>
+      <div class="pc-bar-status">
+        <span class="${s===true?'pc-bar-online':'pc-bar-offline'}">${s===true?'Online':s===false?'Offline':'—'}</span>
+        <span class="pc-bar-id">${id}</span>
+      </div>
     </div>
   </div>`;
 }
 
+// Continuous live loop — fires next request the moment previous one lands
+async function startLiveLoop(id){
+  const gen=(liveGen[id]||0)+1;
+  liveGen[id]=gen;
+  while(liveGen[id]===gen&&currentModel){
+    const t0=performance.now();
+    await fetchAndShowShot(id,gen);
+    // small breath between frames — just enough to not hammer the API
+    const elapsed=performance.now()-t0;
+    if(liveGen[id]===gen&&elapsed<400)
+      await new Promise(r=>setTimeout(r,400-elapsed));
+  }
+}
+
+function stopAllLiveLoops(){
+  for(const id in liveGen) liveGen[id]=-1;
+}
+
+async function fetchAndShowShot(id,gen){
+  try{
+    const res=await fetch(`/api/devices/${id}/screenshot?t=${Date.now()}`);
+    if(!res.ok||liveGen[id]!==gen)return;
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const img=document.getElementById(`pss-${id}`);
+    if(!img||liveGen[id]!==gen){URL.revokeObjectURL(url);return;}
+    // crossfade: brief opacity dip then swap
+    img.classList.add('fading');
+    await new Promise(r=>setTimeout(r,60));
+    if(img._p)URL.revokeObjectURL(img._p);
+    img._p=url; img.src=url; img.style.display='block';
+    const ph=document.getElementById(`pph-${id}`);if(ph)ph.style.display='none';
+    img.classList.remove('fading');
+    // flash the update dot
+    const dot=document.getElementById(`pup-${id}`);
+    if(dot){dot.classList.add('flash');setTimeout(()=>dot.classList.remove('flash'),200);}
+  }catch{}
+}
+
 function goHub(){
+  stopAllLiveLoops();
   currentModel=null;
   document.getElementById('tb-sep').style.display='none';
   document.getElementById('tb-crumb').textContent='';
@@ -887,42 +1013,37 @@ async function saveModalLabel(){
   }catch{toast('Failed','err');}
 }
 
-// ── SCREENSHOTS ──
-async function loadShot(id,imgId,phId){
-  if(statuses[id]===false)return;
-  try{
-    const res=await fetch(`/api/devices/${id}/screenshot?t=${Date.now()}`);
-    if(!res.ok)return;
-    const blob=await res.blob();const url=URL.createObjectURL(blob);
-    const img=document.getElementById(imgId);if(!img)return;
-    if(img._p)URL.revokeObjectURL(img._p);
-    img._p=url;img.src=url;img.style.display='block';
-    const ph=document.getElementById(phId);if(ph)ph.style.display='none';
-  }catch{}
-}
-
 async function refreshAll(){
   await refreshStatuses();
   renderHub();renderStatus();
   if(currentModel){
+    // restart live loops with fresh status
+    stopAllLiveLoops();
     const map=getModelMap();const ids=map[currentModel]||[];const color=mc(currentModel);
     const on=ids.filter(id=>statuses[id]===true).length;
-    document.getElementById('mv-sub').textContent=`${ids.length} clicker${ids.length!==1?'s':''} · ${on} online now`;
+    document.getElementById('mv-sub').innerHTML=
+      `${ids.length} clicker${ids.length!==1?'s':''} · ${on} online &nbsp;`+
+      `<span class="mv-live-badge"><span class="mv-live-dot"></span>LIVE</span>`;
     document.getElementById('phone-wall').innerHTML=ids.map(id=>buildPC(id,color)).join('');
-    ids.forEach(id=>{if(statuses[id]!==false)loadShot(id,`pss-${id}`,`pph-${id}`);});
+    ids.forEach(id=>{if(statuses[id]!==false)startLiveLoop(id);});
   }
 }
 
 function startRefresh(){
   clearInterval(refreshTimer);
+  // Status + hub refresh every 15s — screenshots handled by live loops
   refreshTimer=setInterval(async()=>{
     await refreshStatuses();
     renderHub();renderStatus();
+    // update status dots in model view without rebuilding DOM
     if(currentModel){
       const map=getModelMap();
-      (map[currentModel]||[]).filter(id=>statuses[id]!==false).forEach(id=>loadShot(id,`pss-${id}`,`pph-${id}`));
+      (map[currentModel]||[]).forEach(id=>{
+        const dot=document.getElementById(`psd-${id}`);
+        if(dot){const s=statuses[id];dot.className=`pc-sdot ${s===true?'on':s===false?'off':'unk'}`;}
+      });
     }
-  },config.refreshInterval||10000);
+  },15000);
 }
 
 // ── SETTINGS ──
@@ -964,10 +1085,11 @@ async function saveConfig(){
 function nav(el,view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
-  if(view!=='hub'&&currentModel){goHub();setTimeout(()=>showView(view),10);}
-  else showView(view);
+  stopAllLiveLoops();
+  currentModel=null;
   document.getElementById('tb-sep').style.display='none';
   document.getElementById('tb-crumb').textContent='';
+  showView(view);
 }
 
 function showView(v){
