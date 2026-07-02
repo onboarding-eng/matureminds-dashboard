@@ -43,7 +43,7 @@ async function setLabels(labels) {
     await fetch(`${UPSTASH_URL}/set/labels`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(JSON.stringify(labels))
+      body: JSON.stringify(labels)
     });
   } else {
     fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
