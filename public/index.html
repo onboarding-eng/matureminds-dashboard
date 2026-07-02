@@ -460,6 +460,83 @@ textarea.mi{resize:vertical;min-height:60px;}
 .view{display:none;}
 .view.active{display:block;}
 
+/* ─── CCTV ─── */
+#view-cctv.active{display:flex;flex-direction:column;}
+.cctv-wrap{
+  flex:1;background:#060606;margin:-22px -24px;padding:16px;
+  overflow-y:auto;
+}
+.cctv-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;padding:0 2px;
+}
+.cctv-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;
+}
+.cctv-rec{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);
+  color:#f87171;font-size:10px;font-weight:800;letter-spacing:1.5px;
+  padding:3px 10px;border-radius:4px;
+}
+.cctv-rec-dot{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:recdot 1s ease-in-out infinite;}
+@keyframes recdot{0%,100%{opacity:1;}50%{opacity:.2;}}
+.cctv-count{font-size:11px;color:#555;font-weight:500;}
+
+.cctv-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;
+}
+
+.cc{
+  position:relative;border-radius:6px;overflow:hidden;
+  background:#0a0a0a;border:1px solid #1a1a1a;
+  cursor:pointer;transition:border-color .2s;
+  aspect-ratio:336/720;
+}
+.cc:hover{border-color:var(--green);}
+.cc.cc-offline{opacity:.3;filter:grayscale(1);}
+
+.cc-img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .1s;}
+.cc-img.fading{opacity:.7;}
+
+.cc-ph{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;
+}
+.cc-ph svg{color:#222;}
+.cc-ph span{font-size:8px;color:#333;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
+
+/* overlay label at bottom */
+.cc-label{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.85) 60%);
+  padding:18px 8px 7px;
+}
+.cc-label-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;}
+.cc-model{font-size:10px;font-weight:800;color:#fff;letter-spacing:.3px;}
+.cc-online{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.cc-online.on{background:var(--green);box-shadow:0 0 5px var(--green);}
+.cc-online.off{background:#ef4444;}
+.cc-poster{font-size:9px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* cam ID watermark top-left */
+.cc-camid{
+  position:absolute;top:6px;left:7px;
+  font-size:8px;font-weight:700;color:rgba(255,255,255,.35);
+  letter-spacing:.8px;text-transform:uppercase;
+  font-variant-numeric:tabular-nums;
+}
+/* live flash dot top-right */
+.cc-upd{
+  position:absolute;top:6px;right:7px;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--green);opacity:0;transition:opacity .12s;
+}
+.cc-upd.flash{opacity:1;}
+
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
@@ -498,6 +575,10 @@ textarea.mi{resize:vertical;min-height:60px;}
     <div class="nav-item" data-view="status" onclick="nav(this,'status')">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       Live Status
+    </div>
+    <div class="nav-item" data-view="cctv" onclick="nav(this,'cctv')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.82v6.36a1 1 0 0 1-1.447.89L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+      CCTV Watch
     </div>
     <div class="nav-section-label">Account</div>
     <div class="nav-item" data-view="settings" onclick="nav(this,'settings')">
@@ -595,6 +676,20 @@ textarea.mi{resize:vertical;min-height:60px;}
         </div>
       </div>
       <div class="phone-wall" id="phone-wall"></div>
+    </div>
+
+    <!-- CCTV VIEW -->
+    <div class="view" id="view-cctv">
+      <div class="cctv-wrap">
+        <div class="cctv-topbar">
+          <div class="cctv-title">
+            <div class="cctv-rec"><div class="cctv-rec-dot"></div>REC</div>
+            CCTV Watch
+          </div>
+          <span class="cctv-count" id="cctv-count">—</span>
+        </div>
+        <div class="cctv-grid" id="cctv-grid"></div>
+      </div>
     </div>
 
     <!-- STATUS VIEW -->
@@ -1081,15 +1176,94 @@ async function saveConfig(){
   toast('Saved','ok');
 }
 
+// ── CCTV ──
+let cctvActive=false;
+
+function renderCCTV(){
+  const onlineFirst=[...devices].sort((a,b)=>{
+    const sa=statuses[a]===true?0:1,sb=statuses[b]===true?0:1;
+    if(sa!==sb)return sa-sb;
+    const ma=(labels[a]||{}).model||'z',mb=(labels[b]||{}).model||'z';
+    return ma.localeCompare(mb);
+  });
+  const online=onlineFirst.filter(id=>statuses[id]===true).length;
+  document.getElementById('cctv-count').textContent=`${online} / ${devices.length} feeds live`;
+  document.getElementById('cctv-grid').innerHTML=onlineFirst.map((id,i)=>{
+    const l=labels[id]||{};const s=statuses[id];
+    const color=mc(l.model||'Unassigned');
+    return`<div class="cc ${s===false?'cc-offline':''}" onclick="openDevice('${id}')">
+      <img id="cc-img-${id}" class="cc-img" style="display:none">
+      <div id="cc-ph-${id}" class="cc-ph">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.82v6.36a1 1 0 0 1-1.447.89L15 14"/><rect x="2" y="6" width="13" height="12" rx="2"/></svg>
+        <span>${s===false?'Offline':'Loading…'}</span>
+      </div>
+      <div class="cc-camid">CAM ${String(i+1).padStart(2,'0')}</div>
+      <div class="cc-upd" id="cc-upd-${id}"></div>
+      <div class="cc-label">
+        <div class="cc-label-top">
+          <span class="cc-model" style="color:${color}">${l.model||'Unassigned'}</span>
+          <div class="cc-online ${s===true?'on':'off'}"></div>
+        </div>
+        <div class="cc-poster">${l.poster||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function startCCTVLoop(id){
+  const gen=(liveGen[id]||0)+1;
+  liveGen[id]=gen;
+  while(liveGen[id]===gen&&cctvActive){
+    const t0=performance.now();
+    await fetchCCTVShot(id,gen);
+    const elapsed=performance.now()-t0;
+    if(liveGen[id]===gen&&elapsed<400)
+      await new Promise(r=>setTimeout(r,400-elapsed));
+  }
+}
+
+async function fetchCCTVShot(id,gen){
+  try{
+    const res=await fetch(`/api/devices/${id}/screenshot?t=${Date.now()}`);
+    if(!res.ok||liveGen[id]!==gen)return;
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const img=document.getElementById(`cc-img-${id}`);
+    if(!img||liveGen[id]!==gen){URL.revokeObjectURL(url);return;}
+    img.classList.add('fading');
+    await new Promise(r=>setTimeout(r,50));
+    if(img._p)URL.revokeObjectURL(img._p);
+    img._p=url;img.src=url;img.style.display='block';
+    const ph=document.getElementById(`cc-ph-${id}`);if(ph)ph.style.display='none';
+    img.classList.remove('fading');
+    const dot=document.getElementById(`cc-upd-${id}`);
+    if(dot){dot.classList.add('flash');setTimeout(()=>dot.classList.remove('flash'),150);}
+  }catch{}
+}
+
+function openCCTV(){
+  cctvActive=true;
+  stopAllLiveLoops();
+  renderCCTV();
+  devices.filter(id=>statuses[id]!==false).forEach(id=>startCCTVLoop(id));
+}
+
+function closeCCTV(){
+  cctvActive=false;
+  stopAllLiveLoops();
+}
+
 // ── NAVIGATION ──
 function nav(el,view){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
+  closeCCTV();
   stopAllLiveLoops();
   currentModel=null;
   document.getElementById('tb-sep').style.display='none';
   document.getElementById('tb-crumb').textContent='';
   showView(view);
+  if(view==='cctv')openCCTV();
 }
 
 function showView(v){
